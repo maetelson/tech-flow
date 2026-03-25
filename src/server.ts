@@ -50,6 +50,11 @@ app.use(cors());
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
 
+// Render 헬스체크
+app.get('/health', (_req: Request, res: Response) => {
+  res.status(200).json({ status: 'ok' });
+});
+
 // API 엔드포인트
 
 // 모든 플로우 조회
@@ -145,6 +150,10 @@ app.post('/api/flows', (req: Request, res: Response) => {
 
 // 플로우 삭제
 app.delete('/api/flows/:id', (req: Request, res: Response) => {
+  if (!db || !dbAvailable) {
+    return res.status(500).json({ error: 'DB unavailable' });
+  }
+
   try {
     const stmt = db.prepare('DELETE FROM flows WHERE id = ?');
     const result = stmt.run(req.params.id);

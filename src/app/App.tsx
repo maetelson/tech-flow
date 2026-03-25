@@ -27,7 +27,7 @@ export default function App() {
 
   // 실시간 소켓 연결 + 동기화
   useEffect(() => {
-    const socket = io('http://localhost:3001');
+    const socket = io('https://tech-flow-jxfe.onrender.com');
     socketRef.current = socket;
 
     socket.on('connect', () => {
