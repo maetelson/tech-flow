@@ -3,6 +3,7 @@ import Database from 'better-sqlite3';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 import path from 'path';
+import fs from 'fs';
 import http from 'http';
 import { Server as IOServer } from 'socket.io';
 import { fileURLToPath } from 'url';
@@ -12,14 +13,16 @@ const __dirname = path.dirname(__filename);
 
 const app: Express = express();
 const PORT = parseInt(process.env.PORT || '3001', 10);
-const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || '*';
+// 쉼표로 여러 도메인 지정 가능: "https://a.vercel.app,https://b.vercel.app"
+const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGIN || '*').split(',').map((s) => s.trim());
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, '../data/flows.db');
 
 const httpServer = http.createServer(app);
 const io = new IOServer(httpServer, {
   cors: {
-    origin: ALLOWED_ORIGIN,
+    origin: ALLOWED_ORIGINS.length === 1 && ALLOWED_ORIGINS[0] === '*' ? '*' : ALLOWED_ORIGINS,
     methods: ['GET', 'POST'],
+    credentials: true,
   },
 });
 
@@ -28,6 +31,12 @@ const dbPath = DB_PATH;
 let db: Database.Database | null = null;
 let dbAvailable = true;
 try {
+  // DB 파일이 들어갈 디렉토리 자동 생성
+  const dbDir = path.dirname(dbPath);
+  if (!fs.existsSync(dbDir)) {
+    fs.mkdirSync(dbDir, { recursive: true });
+    console.log(`📁 Created DB directory: ${dbDir}`);
+  }
   db = new Database(dbPath);
   db.exec(`
     CREATE TABLE IF NOT EXISTS flows (
@@ -46,7 +55,10 @@ try {
 }
 
 // 미들웨어
-app.use(cors());
+app.use(cors({
+  origin: ALLOWED_ORIGINS.length === 1 && ALLOWED_ORIGINS[0] === '*' ? '*' : ALLOWED_ORIGINS,
+  credentials: true,
+}));
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
 
