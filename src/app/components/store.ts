@@ -91,10 +91,6 @@ interface FlowState {
   sidebarOpen: boolean;
   setSidebarOpen: (v: boolean) => void;
 
-  // 원격 동기화 (socket.io 등)
-  isRemoteUpdating: boolean;
-  setIsRemoteUpdating: (v: boolean) => void;
-
   // 노드 추가
   addNode: (partial?: Partial<Pick<FlowNode, 'position'> & { data: Partial<FlowNodeData> }>) => string;
   // 방향별 노드 추가 + 연결
@@ -142,6 +138,7 @@ const HANDLE_MAP: Record<string, { sourceHandle: string; targetHandle: string }>
 };
 
 const initialFlowId = 'flow-1';
+const LOCAL_STORAGE_KEY = 'tech-flow:flows:v1';
 
 // 현재 활성 플로우 상태를 flows 배열에 동기화하는 헬퍼
 function syncCurrentToFlows(state: FlowState): FlowData[] {
@@ -265,8 +262,6 @@ export const useFlowStore = create<FlowState>((set, get) => ({
   setSelection: (s) => set({ selection: s }),
   sidebarOpen: true,
   setSidebarOpen: (v) => set({ sidebarOpen: v }),
-  isRemoteUpdating: false,
-  setIsRemoteUpdating: (v) => set({ isRemoteUpdating: v }),
 
   _counter: 1,
   _flowCounter: 1,
@@ -390,22 +385,14 @@ export const useFlowStore = create<FlowState>((set, get) => ({
     const state = get();
     set({ isSaving: true });
     try {
-      const activeFlow = state.flows.find((f) => f.id === state.activeFlowId);
-      if (!activeFlow) throw new Error('Active flow not found');
+      const flows = syncCurrentToFlows(state);
+      const payload = {
+        flows,
+        activeFlowId: state.activeFlowId,
+      };
 
-      const response = await fetch('http://localhost:3001/api/flows', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: activeFlow.id,
-          name: activeFlow.name,
-          nodes: state.nodes,
-          edges: state.edges,
-        }),
-      });
-
-      if (!response.ok) throw new Error('Failed to save flow');
-      console.log('✅ Flow saved successfully');
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(payload));
+      console.log('✅ Flow saved to localStorage');
     } catch (error) {
       console.error('❌ Save error:', error);
       throw error;
@@ -415,19 +402,26 @@ export const useFlowStore = create<FlowState>((set, get) => ({
   },
   loadFromDb: async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/flows');
-      if (!response.ok) throw new Error('Failed to load flows');
-      const flows: FlowData[] = await response.json();
+      const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (!raw) return;
+
+      const parsed = JSON.parse(raw) as { flows?: FlowData[]; activeFlowId?: string };
+      const flows = Array.isArray(parsed.flows) ? parsed.flows : [];
       if (flows.length > 0) {
-        // 첫 번째 플로우를 활성으로 설정
-        const firstFlow = flows[0];
+        const initialActiveId = parsed.activeFlowId ?? flows[0].id;
+        const active = flows.find((f) => f.id === initialActiveId) ?? flows[0];
+        const maxFlowCounter = flows.reduce((max, flow) => {
+          const n = Number.parseInt(flow.id.replace('flow-', ''), 10);
+          return Number.isFinite(n) ? Math.max(max, n) : max;
+        }, 1);
         set({
           flows,
-          activeFlowId: firstFlow.id,
-          nodes: firstFlow.nodes,
-          edges: firstFlow.edges,
-          _counter: firstFlow._counter,
-          _undoStack: firstFlow._undoStack,
+          activeFlowId: active.id,
+          nodes: active.nodes,
+          edges: active.edges,
+          _counter: active._counter,
+          _undoStack: active._undoStack,
+          _flowCounter: maxFlowCounter,
         });
       }
     } catch (error) {
