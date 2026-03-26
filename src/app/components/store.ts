@@ -118,6 +118,11 @@ interface FlowState {
   // Export 기능
   canvasRef: HTMLDivElement | null;
   setCanvasRef: (ref: HTMLDivElement | null) => void;
+
+  // 뷰포트 중심 좌표 제공 콜백 (FlowCanvas에서 등록)
+  getViewportCenter: (() => { x: number; y: number }) | null;
+  setGetViewportCenter: (fn: (() => { x: number; y: number }) | null) => void;
+
   exportAllFlows: (canvasElement: HTMLDivElement | null) => Promise<void>;
 }
 
@@ -344,7 +349,7 @@ export const useFlowStore = create<FlowState>((set, get) => ({
     const newNode: FlowNode = {
       id,
       type: 'flowNode',
-      position: partial?.position ?? { x: 100 + state.nodes.length * 30, y: 100 + state.nodes.length * 20 },
+      position: partial?.position ?? (state.getViewportCenter ? state.getViewportCenter() : { x: 100 + state.nodes.length * 30, y: 100 + state.nodes.length * 20 }),
       data: {
           title: '새 노드',
           category: 'generic',
@@ -504,6 +509,11 @@ export const useFlowStore = create<FlowState>((set, get) => ({
   // Export 기능
   canvasRef: null,
   setCanvasRef: (ref) => set({ canvasRef: ref }),
+
+    // 뷰포트 중심 콜백
+    getViewportCenter: null,
+    setGetViewportCenter: (fn) => set({ getViewportCenter: fn }),
+
   exportAllFlows: async (canvasElement: HTMLDivElement | null) => {
     if (!canvasElement) {
       console.error('Canvas element not available');

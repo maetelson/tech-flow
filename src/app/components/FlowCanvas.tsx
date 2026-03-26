@@ -38,6 +38,7 @@ export function FlowCanvas() {
   const updateEdges = useFlowStore((s) => s.updateEdges);
   const setConnectSource = useFlowStore((s) => s.setConnectSource);
   const setCanvasRef = useFlowStore((s) => s.setCanvasRef);
+  const setGetViewportCenter = useFlowStore((s) => s.setGetViewportCenter);
 
   // 노드 변경 핸들러 (드래그 이동 등)
   const onNodesChange: OnNodesChange = useCallback(
@@ -156,6 +157,22 @@ export function FlowCanvas() {
   // 피그마 수준의 빠른 줌: 기본 React Flow 줌을 끄고 직접 처리
   const { getViewport, setViewport } = useReactFlow();
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // 뷰포트 중심 좌표 → 플로우 좌표 변환 콜백을 store에 등록
+  useEffect(() => {
+    const fn = () => {
+      const el = containerRef.current;
+      const vp = getViewport();
+      const w = el ? el.clientWidth : window.innerWidth;
+      const h = el ? el.clientHeight : window.innerHeight;
+      return {
+        x: (w / 2 - vp.x) / vp.zoom,
+        y: (h / 2 - vp.y) / vp.zoom,
+      };
+    };
+    setGetViewportCenter(fn);
+    return () => setGetViewportCenter(null);
+  }, [getViewport, setGetViewportCenter]);
 
   useEffect(() => {
     const el = containerRef.current;
