@@ -3,6 +3,9 @@
   "private": true,
   "version": "0.0.1",
   "type": "module",
+  "engines": {
+    "node": ">=22.5.0"
+  },
   "scripts": {
     "prebuild": "node scripts/generate-flow-seed.mjs",
     "predev": "node scripts/generate-flow-seed.mjs",
