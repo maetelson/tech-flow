@@ -1,5 +1,5 @@
 {
-  "activeFlowId": "flow-1",
+  "_manualSave": true,
   "flows": [
     {
       "id": "flow-1",
@@ -95,5 +95,6 @@
       "_counter": 4,
       "_undoStack": []
     }
-  ]
+  ],
+  "activeFlowId": "flow-1"
 }
