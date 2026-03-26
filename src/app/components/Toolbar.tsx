@@ -112,7 +112,7 @@ export function Toolbar() {
           onClick={handleSave}
           disabled={isSaving}
           className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-green-500 hover:bg-green-600 disabled:bg-gray-400 text-white rounded-lg transition-colors"
-          title="데이터베이스에 저장 (Ctrl+S)"
+          title="브라우저에 저장 (Ctrl+S)"
         >
           <Save size={14} />
           {isSaving ? '저장 중...' : '저장'}
@@ -131,7 +131,7 @@ export function Toolbar() {
 
       {/* 플로팅 토스트 */}
       {toast && (
-        <div className="fixed right-5 bottom-5 z-50 px-4 py-2 rounded-lg text-sm font-medium shadow-lg transition-opacity duration-300"
+        <div className="fixed left-1/2 top-5 z-50 -translate-x-1/2 px-4 py-2 rounded-lg text-sm font-medium shadow-lg transition-opacity duration-300"
           style={{
             backgroundColor: toast.type === 'success' ? '#d1fae5' : '#fee2e2',
             color: toast.type === 'success' ? '#065f46' : '#991b1b',

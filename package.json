@@ -4,6 +4,8 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
+    "prebuild": "node scripts/generate-flow-seed.mjs",
+    "predev": "node scripts/generate-flow-seed.mjs",
     "build": "vite build",
     "dev": "vite",
     "dev:all": "npm run dev"

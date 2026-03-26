@@ -139,6 +139,77 @@ const HANDLE_MAP: Record<string, { sourceHandle: string; targetHandle: string }>
 
 const initialFlowId = 'flow-1';
 const LOCAL_STORAGE_KEY = 'tech-flow:flows:v1';
+const SEED_DATA_URL = '/data/flows.seed.json';
+
+interface PersistedFlowPayload {
+  flows?: FlowData[];
+  activeFlowId?: string;
+}
+
+function getNodeCounter(nodes: FlowNode[]): number {
+  const maxNodeIndex = nodes.reduce((max, node) => {
+    const match = node.id.match(/node-(\d+)/);
+    const numericId = match ? Number.parseInt(match[1], 10) : Number.NaN;
+    return Number.isFinite(numericId) ? Math.max(max, numericId) : max;
+  }, 0);
+
+  return maxNodeIndex + 1;
+}
+
+function normalizeFlow(flow: Partial<FlowData>): FlowData {
+  const nodes = Array.isArray(flow.nodes) ? flow.nodes : [];
+  const edges = Array.isArray(flow.edges) ? flow.edges : [];
+  const undoStack = Array.isArray(flow._undoStack) ? flow._undoStack : [];
+
+  return {
+    id: flow.id ?? initialFlowId,
+    name: flow.name ?? 'tech flow',
+    nodes,
+    edges,
+    _counter: typeof flow._counter === 'number' && flow._counter > 0 ? flow._counter : getNodeCounter(nodes),
+    _undoStack: undoStack,
+  };
+}
+
+function applyPersistedFlows(payload: PersistedFlowPayload): boolean {
+  const flows = Array.isArray(payload.flows) ? payload.flows.map(normalizeFlow) : [];
+  if (flows.length === 0) {
+    return false;
+  }
+
+  const initialActiveId = payload.activeFlowId ?? flows[0].id;
+  const active = flows.find((flow) => flow.id === initialActiveId) ?? flows[0];
+  const maxFlowCounter = flows.reduce((max, flow) => {
+    const n = Number.parseInt(flow.id.replace('flow-', ''), 10);
+    return Number.isFinite(n) ? Math.max(max, n) : max;
+  }, 1);
+
+  useFlowStore.setState({
+    flows,
+    activeFlowId: active.id,
+    nodes: active.nodes,
+    edges: active.edges,
+    _counter: active._counter,
+    _undoStack: active._undoStack,
+    _flowCounter: maxFlowCounter,
+  });
+
+  return true;
+}
+
+async function loadSeedFlows(): Promise<PersistedFlowPayload | null> {
+  try {
+    const response = await fetch(SEED_DATA_URL, { cache: 'no-store' });
+    if (!response.ok) {
+      return null;
+    }
+
+    return (await response.json()) as PersistedFlowPayload;
+  } catch (error) {
+    console.warn('Failed to load seeded flows:', error);
+    return null;
+  }
+}
 
 // 현재 활성 플로우 상태를 flows 배열에 동기화하는 헬퍼
 function syncCurrentToFlows(state: FlowState): FlowData[] {
@@ -392,7 +463,7 @@ export const useFlowStore = create<FlowState>((set, get) => ({
       };
 
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(payload));
-      console.log('✅ Flow saved to localStorage');
+      console.log('✅ Flow saved to browser storage');
     } catch (error) {
       console.error('❌ Save error:', error);
       throw error;
@@ -403,26 +474,16 @@ export const useFlowStore = create<FlowState>((set, get) => ({
   loadFromDb: async () => {
     try {
       const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
-      if (!raw) return;
+      if (raw) {
+        const parsed = JSON.parse(raw) as PersistedFlowPayload;
+        if (applyPersistedFlows(parsed)) {
+          return;
+        }
+      }
 
-      const parsed = JSON.parse(raw) as { flows?: FlowData[]; activeFlowId?: string };
-      const flows = Array.isArray(parsed.flows) ? parsed.flows : [];
-      if (flows.length > 0) {
-        const initialActiveId = parsed.activeFlowId ?? flows[0].id;
-        const active = flows.find((f) => f.id === initialActiveId) ?? flows[0];
-        const maxFlowCounter = flows.reduce((max, flow) => {
-          const n = Number.parseInt(flow.id.replace('flow-', ''), 10);
-          return Number.isFinite(n) ? Math.max(max, n) : max;
-        }, 1);
-        set({
-          flows,
-          activeFlowId: active.id,
-          nodes: active.nodes,
-          edges: active.edges,
-          _counter: active._counter,
-          _undoStack: active._undoStack,
-          _flowCounter: maxFlowCounter,
-        });
+      const seededPayload = await loadSeedFlows();
+      if (seededPayload) {
+        applyPersistedFlows(seededPayload);
       }
     } catch (error) {
       console.error('❌ Load error:', error);
