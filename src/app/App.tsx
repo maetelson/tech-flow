@@ -4,16 +4,36 @@ import { FlowCanvas } from './components/FlowCanvas';
 import { Sidebar } from './components/Sidebar';
 import { LeftSidebar } from './components/LeftSidebar';
 import { useFlowStore } from './components/store';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 export default function App() {
   const saveToDb = useFlowStore((s) => s.saveToDb);
   const loadFromDb = useFlowStore((s) => s.loadFromDb);
+  const nodes = useFlowStore((s) => s.nodes);
+  const edges = useFlowStore((s) => s.edges);
+  const flows = useFlowStore((s) => s.flows);
+  const activeFlowId = useFlowStore((s) => s.activeFlowId);
+  const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isInitialized = useRef(false);
 
   // 앱 시작 시 데이터 로드
   useEffect(() => {
-    loadFromDb();
+    loadFromDb().then(() => {
+      isInitialized.current = true;
+    });
   }, [loadFromDb]);
+
+  // 변경 시 자동 저장 (1초 디바운스)
+  useEffect(() => {
+    if (!isInitialized.current) return;
+    if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
+    autoSaveTimer.current = setTimeout(() => {
+      saveToDb().catch(() => {});
+    }, 1000);
+    return () => {
+      if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
+    };
+  }, [nodes, edges, flows, activeFlowId, saveToDb]);
 
   // Ctrl+S 단축키
   useEffect(() => {
