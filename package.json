@@ -8,7 +8,8 @@
     "predev": "node scripts/generate-flow-seed.mjs",
     "build": "vite build",
     "dev": "vite",
-    "dev:all": "npm run dev"
+    "dev:all": "npm run dev",
+    "seed:reset": "node -e \"const fs=require('fs');const p='public/data/flows.seed.json';if(fs.existsSync(p)){const d=JSON.parse(fs.readFileSync(p,'utf8'));delete d._manualSave;fs.writeFileSync(p,JSON.stringify(d,null,2)+'\\n');}\" && node scripts/generate-flow-seed.mjs"
   },
   "dependencies": {
     "@emotion/react": "11.14.0",

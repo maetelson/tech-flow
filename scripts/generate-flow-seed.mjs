@@ -1,4 +1,4 @@
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync, existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { DatabaseSync } from 'node:sqlite';
@@ -9,6 +9,19 @@ const rootDir = path.resolve(__dirname, '..');
 const databasePath = path.join(rootDir, 'data', 'flows.db');
 const outputDir = path.join(rootDir, 'public', 'data');
 const outputPath = path.join(outputDir, 'flows.seed.json');
+
+// 앱에서 수동 저장된 seed가 있으면 덮어쓰지 않음
+if (existsSync(outputPath)) {
+  try {
+    const existing = JSON.parse(readFileSync(outputPath, 'utf8'));
+    if (existing._manualSave === true) {
+      console.log('Skipped: flows.seed.json was manually saved from app (use npm run seed:reset to regenerate from DB).');
+      process.exit(0);
+    }
+  } catch (_) {
+    // 파싱 실패 시 계속 진행
+  }
+}
 
 function parseJsonColumn(value, fallback) {
   if (!value) {

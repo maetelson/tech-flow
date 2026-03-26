@@ -458,11 +458,22 @@ export const useFlowStore = create<FlowState>((set, get) => ({
     try {
       const flows = syncCurrentToFlows(state);
       const payload = {
+        _manualSave: true,
         flows,
         activeFlowId: state.activeFlowId,
       };
 
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(payload));
+
+      // dev 환경에서는 파일에도 저장 (git push 시 Vercel 배포에 반영됨)
+      if (import.meta.env.DEV) {
+        fetch('/api/save-flows', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        }).catch(() => {});
+      }
+
       console.log('✅ Flow saved to browser storage');
     } catch (error) {
       console.error('❌ Save error:', error);
