@@ -1,7 +1,7 @@
 // 상단 툴바: 노드 추가, 모드 전환, 현재 모드 표시
 import { useFlowStore } from './store';
-import { Plus, MousePointer, Link, Undo2, Save, Download } from 'lucide-react';
-import { useState } from 'react';
+import { Plus, MousePointer, Link, Undo2, Save, Download, Upload, DatabaseBackup } from 'lucide-react';
+import { useState, useRef } from 'react';
 
 export function Toolbar() {
   const mode = useFlowStore((s) => s.mode);
@@ -16,6 +16,7 @@ export function Toolbar() {
   
   const [toast, setToast] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [isExporting, setIsExporting] = useState(false);
+  const importInputRef = useRef<HTMLInputElement>(null);
 
   const showToast = (type: 'success' | 'error', text: string) => {
     setToast({ type, text });
@@ -29,6 +30,41 @@ export function Toolbar() {
     } catch (error) {
       showToast('error', '저장 실패');
     }
+  };
+
+  // 플로우 데이터를 JSON 파일로 백업
+  const handleBackup = () => {
+    const raw = localStorage.getItem('tech-flow:flows:v1');
+    if (!raw) { showToast('error', '저장된 데이터 없음'); return; }
+    const blob = new Blob([raw], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `tech-flow-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('success', '백업 파일 다운로드!');
+  };
+
+  // JSON 파일을 불러와서 복원
+  const handleRestore = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+      try {
+        const text = ev.target?.result as string;
+        JSON.parse(text); // 유효성 검사
+        localStorage.setItem('tech-flow:flows:v1', text);
+        await useFlowStore.getState().loadFromDb();
+        await useFlowStore.getState().saveToDb();
+        showToast('success', '데이터 복원 완료!');
+      } catch {
+        showToast('error', '파일이 올바르지 않음');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
   };
 
   const handleExport = async () => {
@@ -108,6 +144,26 @@ export function Toolbar() {
 
       {/* 저장 및 내보내기 버튼 */}
       <div className="ml-auto flex items-center gap-2">
+        {/* 숨겨진 파일 인풋 */}
+        <input ref={importInputRef} type="file" accept=".json" className="hidden" onChange={handleRestore} />
+
+        <button
+          onClick={handleBackup}
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors"
+          title="플로우 데이터를 JSON 파일로 백업"
+        >
+          <DatabaseBackup size={14} />
+          백업
+        </button>
+
+        <button
+          onClick={() => importInputRef.current?.click()}
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors"
+          title="JSON 백업 파일에서 데이터 복원"
+        >
+          <Upload size={14} />
+          복원
+        </button>
         <button
           onClick={handleSave}
           disabled={isSaving}
