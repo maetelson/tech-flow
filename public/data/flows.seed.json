@@ -1,5 +1,6 @@
 {
   "_manualSave": true,
+  "_seedVersion": 1,
   "flows": [
     {
       "id": "flow-1",
@@ -99,7 +100,7 @@
             "width": 183,
             "height": 79
           },
-          "selected": true,
+          "selected": false,
           "dragging": false
         },
         {
@@ -173,175 +174,6 @@
       ],
       "_counter": 11,
       "_undoStack": [
-        {
-          "nodes": [
-            {
-              "id": "node-1",
-              "type": "flowNode",
-              "position": {
-                "x": 100,
-                "y": 100
-              },
-              "data": {
-                "title": "질문 입력",
-                "category": "user input",
-                "description": "",
-                "json": ""
-              },
-              "measured": {
-                "width": 160,
-                "height": 79
-              },
-              "selected": false
-            },
-            {
-              "id": "node-2",
-              "type": "flowNode",
-              "position": {
-                "x": 360,
-                "y": 100
-              },
-              "data": {
-                "title": "입력 검증",
-                "category": "frontend",
-                "description": "- trim() 후 null인지 검사\n- 3~100자까지 가능하도록",
-                "json": "// Request\nAuthorization: Bearer {accessToken}\n{\n    \"conversationId\" : String\n\t\"question\": String\n}"
-              },
-              "measured": {
-                "width": 160,
-                "height": 79
-              },
-              "selected": false
-            },
-            {
-              "id": "node-3",
-              "type": "flowNode",
-              "position": {
-                "x": 620,
-                "y": 100
-              },
-              "data": {
-                "title": "입력 검증",
-                "category": "backend",
-                "description": "@NotNull, @NotBlank",
-                "json": "Authorization: Bearer {token}\nContent-Type: application/json\nX-Request-Id: {uuid}\n\n{\n  \"question\": \"string\",\n  \"conversationId\": \"string\",\n  \"userId\": \"string\",\n  \"timestamp\": \"string\"\n}"
-              },
-              "measured": {
-                "width": 160,
-                "height": 79
-              },
-              "selected": false
-            },
-            {
-              "id": "node-5",
-              "type": "flowNode",
-              "position": {
-                "x": -593.6434553547857,
-                "y": 100.01907333679748
-              },
-              "data": {
-                "title": "질문 처리 단계 상태값",
-                "category": "generic",
-                "description": "## 상태값 순서\n- PARSED → REQUIREMENTS_EXTRACTED → NEEDS_SOURCE\n- ROLES_MATCHED → AMBIGUOUS -> NEEDS_CLARIFICATION -> NORMALIZED\n\n\n## 질문 상태값\n- RECEIVED\n- PARSED\n- REQUIREMENTS_EXTRACTED\n- ROLES_MATCHED\n- AMBIGUOUS\n- NEEDS_CLARIFICATION\n- NORMALIZED\n- READY_TO_EXECUTE\n- FAILED",
-                "json": ""
-              },
-              "measured": {
-                "width": 160,
-                "height": 79
-              },
-              "selected": false,
-              "dragging": false
-            },
-            {
-              "id": "node-6",
-              "type": "flowNode",
-              "position": {
-                "x": -402.9930767994537,
-                "y": 99.66972932392767
-              },
-              "data": {
-                "title": "Semantic Role ontology",
-                "category": "generic",
-                "description": "## 1. master_role\n- date\n- region\n- product\n- customer\n- amount\n- quantity\n- status\n- channel\n\n## 2. sub_role\n- order_date\n- shipment_date\n- delivery_date\n- origin_region\n- destination_region\n- product_price\n- shipping_fee\n- discount_amount\n\n## 3. analytic_role\n- dimension\n- measure\n- filter_only\n- identifier\n\n## 4. slot_name\n- time_context\n- metric_definition\n- region_filter\n- group_by\n- comparison_target\n- top_n\n\n\n\n.",
-                "json": ""
-              },
-              "measured": {
-                "width": 183,
-                "height": 79
-              },
-              "selected": false,
-              "dragging": false
-            },
-            {
-              "id": "node-7",
-              "type": "flowNode",
-              "position": {
-                "x": -592.7295357038972,
-                "y": 201.60558139691145
-              },
-              "data": {
-                "title": "Metric Definition Registry",
-                "category": "generic",
-                "description": "",
-                "json": ""
-              },
-              "measured": {
-                "width": 193,
-                "height": 79
-              },
-              "selected": false,
-              "dragging": false
-            },
-            {
-              "id": "node-8",
-              "type": "flowNode",
-              "position": {
-                "x": -376.43262132591786,
-                "y": 198.0596241793705
-              },
-              "data": {
-                "title": "Ambiguity taxonomy",
-                "category": "generic",
-                "description": "- date_sub_role_not_resolved\n- multiple_candidate_columns\n- metric_definition_ambiguous\n- time_range_not_resolved\n- grouping_target_ambiguous\n- comparison_target_missing\n- required_role_missing",
-                "json": ""
-              },
-              "measured": {
-                "width": 163,
-                "height": 79
-              },
-              "selected": false,
-              "dragging": false
-            }
-          ],
-          "edges": [
-            {
-              "id": "edge-node-1-node-2",
-              "source": "node-1",
-              "target": "node-2",
-              "sourceHandle": "right-source",
-              "targetHandle": "left-target",
-              "type": "flowEdge",
-              "data": {
-                "labelShort": "",
-                "description": "",
-                "json": ""
-              }
-            },
-            {
-              "id": "edge-node-2-node-3",
-              "source": "node-2",
-              "target": "node-3",
-              "sourceHandle": "right-source",
-              "targetHandle": "left-target",
-              "type": "flowEdge",
-              "data": {
-                "labelShort": "",
-                "description": "",
-                "json": ""
-              }
-            }
-          ]
-        },
         {
           "nodes": [
             {
@@ -997,6 +829,175 @@
                 "height": 79
               },
               "selected": false,
+              "dragging": false
+            },
+            {
+              "id": "node-7",
+              "type": "flowNode",
+              "position": {
+                "x": -592.7295357038972,
+                "y": 201.60558139691145
+              },
+              "data": {
+                "title": "Metric Definition Registry",
+                "category": "generic",
+                "description": "",
+                "json": ""
+              },
+              "measured": {
+                "width": 193,
+                "height": 79
+              },
+              "selected": false,
+              "dragging": false
+            },
+            {
+              "id": "node-8",
+              "type": "flowNode",
+              "position": {
+                "x": -376.43262132591786,
+                "y": 198.0596241793705
+              },
+              "data": {
+                "title": "Ambiguity taxonomy",
+                "category": "generic",
+                "description": "- date_sub_role_not_resolved\n- multiple_candidate_columns\n- metric_definition_ambiguous\n- time_range_not_resolved\n- grouping_target_ambiguous\n- comparison_target_missing\n- required_role_missing",
+                "json": ""
+              },
+              "measured": {
+                "width": 163,
+                "height": 79
+              },
+              "selected": false,
+              "dragging": false
+            }
+          ],
+          "edges": [
+            {
+              "id": "edge-node-1-node-2",
+              "source": "node-1",
+              "target": "node-2",
+              "sourceHandle": "right-source",
+              "targetHandle": "left-target",
+              "type": "flowEdge",
+              "data": {
+                "labelShort": "",
+                "description": "",
+                "json": ""
+              }
+            },
+            {
+              "id": "edge-node-2-node-3",
+              "source": "node-2",
+              "target": "node-3",
+              "sourceHandle": "right-source",
+              "targetHandle": "left-target",
+              "type": "flowEdge",
+              "data": {
+                "labelShort": "",
+                "description": "",
+                "json": ""
+              }
+            }
+          ]
+        },
+        {
+          "nodes": [
+            {
+              "id": "node-1",
+              "type": "flowNode",
+              "position": {
+                "x": 100,
+                "y": 100
+              },
+              "data": {
+                "title": "질문 입력",
+                "category": "user input",
+                "description": "",
+                "json": ""
+              },
+              "measured": {
+                "width": 160,
+                "height": 79
+              },
+              "selected": false
+            },
+            {
+              "id": "node-2",
+              "type": "flowNode",
+              "position": {
+                "x": 360,
+                "y": 100
+              },
+              "data": {
+                "title": "입력 검증",
+                "category": "frontend",
+                "description": "- trim() 후 null인지 검사\n- 3~100자까지 가능하도록",
+                "json": "// Request\nAuthorization: Bearer {accessToken}\n{\n    \"conversationId\" : String\n\t\"question\": String\n}"
+              },
+              "measured": {
+                "width": 160,
+                "height": 79
+              },
+              "selected": false
+            },
+            {
+              "id": "node-3",
+              "type": "flowNode",
+              "position": {
+                "x": 620,
+                "y": 100
+              },
+              "data": {
+                "title": "입력 검증",
+                "category": "backend",
+                "description": "@NotNull, @NotBlank",
+                "json": "Authorization: Bearer {token}\nContent-Type: application/json\nX-Request-Id: {uuid}\n\n{\n  \"question\": \"string\",\n  \"conversationId\": \"string\",\n  \"userId\": \"string\",\n  \"timestamp\": \"string\"\n}"
+              },
+              "measured": {
+                "width": 160,
+                "height": 79
+              },
+              "selected": false
+            },
+            {
+              "id": "node-5",
+              "type": "flowNode",
+              "position": {
+                "x": -593.6434553547857,
+                "y": 100.01907333679748
+              },
+              "data": {
+                "title": "질문 처리 단계 상태값",
+                "category": "generic",
+                "description": "## 상태값 순서\n- PARSED → REQUIREMENTS_EXTRACTED → NEEDS_SOURCE\n- ROLES_MATCHED → AMBIGUOUS -> NEEDS_CLARIFICATION -> NORMALIZED\n\n\n## 질문 상태값\n- RECEIVED\n- PARSED\n- REQUIREMENTS_EXTRACTED\n- ROLES_MATCHED\n- AMBIGUOUS\n- NEEDS_CLARIFICATION\n- NORMALIZED\n- READY_TO_EXECUTE\n- FAILED",
+                "json": ""
+              },
+              "measured": {
+                "width": 160,
+                "height": 79
+              },
+              "selected": false,
+              "dragging": false
+            },
+            {
+              "id": "node-6",
+              "type": "flowNode",
+              "position": {
+                "x": -402.9930767994537,
+                "y": 99.66972932392767
+              },
+              "data": {
+                "title": "Semantic Role ontology",
+                "category": "generic",
+                "description": "## 1. master_role\n- date\n- region\n- product\n- customer\n- amount\n- quantity\n- status\n- channel\n\n## 2. sub_role\n- order_date\n- shipment_date\n- delivery_date\n- origin_region\n- destination_region\n- product_price\n- shipping_fee\n- discount_amount\n\n## 3. analytic_role\n- dimension\n- measure\n- filter_only\n- identifier\n\n## 4. slot_name\n- time_context\n- metric_definition\n- region_filter\n- group_by\n- comparison_target\n- top_n\n\n\n\n.",
+                "json": ""
+              },
+              "measured": {
+                "width": 183,
+                "height": 79
+              },
+              "selected": true,
               "dragging": false
             },
             {

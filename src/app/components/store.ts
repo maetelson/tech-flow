@@ -149,6 +149,7 @@ const SEED_DATA_URL = '/data/flows.seed.json';
 interface PersistedFlowPayload {
   flows?: FlowData[];
   activeFlowId?: string;
+  _seedVersion?: number;
 }
 
 function getNodeCounter(nodes: FlowNode[]): number {
@@ -462,8 +463,12 @@ export const useFlowStore = create<FlowState>((set, get) => ({
     set({ isSaving: true });
     try {
       const flows = syncCurrentToFlows(state);
+      // 기존 seedVersion 보존
+      const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
+      const prev = raw ? (JSON.parse(raw) as PersistedFlowPayload) : null;
       const payload = {
         _manualSave: true,
+        _seedVersion: prev?._seedVersion ?? 0,
         flows,
         activeFlowId: state.activeFlowId,
       };
@@ -490,16 +495,28 @@ export const useFlowStore = create<FlowState>((set, get) => ({
   loadFromDb: async () => {
     try {
       const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw) as PersistedFlowPayload;
-        if (applyPersistedFlows(parsed)) {
+      const local = raw ? (JSON.parse(raw) as PersistedFlowPayload) : null;
+      const seeded = await loadSeedFlows();
+
+      const localVersion = local?._seedVersion ?? 0;
+      const seedVersion = seeded?._seedVersion ?? 0;
+
+      // seed 파일이 더 새로우면 seed 우선
+      if (seeded && seedVersion > localVersion) {
+        if (applyPersistedFlows(seeded)) {
+          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({ ...seeded, _seedVersion: seedVersion }));
           return;
         }
       }
 
-      const seededPayload = await loadSeedFlows();
-      if (seededPayload) {
-        applyPersistedFlows(seededPayload);
+      // 그 외에는 localStorage 우선
+      if (local && applyPersistedFlows(local)) {
+        return;
+      }
+
+      // localStorage도 없으면 seed 사용
+      if (seeded) {
+        applyPersistedFlows(seeded);
       }
     } catch (error) {
       console.error('❌ Load error:', error);
