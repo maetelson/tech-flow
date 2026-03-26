@@ -1,15 +1,56 @@
-<<<<<<< HEAD
 # tech-flow
-=======
 
-  # tech flow
+`tech-flow`는 서비스 구조를 빠르게 시각화하고, 노드 간 관계를 한 화면에서 정리할 수 있는 유저 플로우 편집기입니다.
 
-  This is a code bundle for tech flow. The original project is available at https://www.figma.com/design/ROtBCTIVtkTIRmyjIr9sO9/tech-flow.
+복잡한 기능 흐름을 문서와 말로만 정리하면 입력, 검증, API 호출, AI 처리, DB 저장 같은 연결 관계가 쉽게 흐려집니다. `tech-flow`는 이 과정을 노드와 엣지로 바로 표현해서, 기획과 개발 사이의 구조를 더 빠르게 맞추는 데 초점을 둡니다.
 
-  ## Running the code
+## 왜 필요한가
 
-  Run `npm i` to install the dependencies.
+- 단순 다이어그램보다 실제 구현 흐름에 가깝게 정리할 수 있습니다.
+- 각 노드와 연결선에 설명, 노트, JSON을 함께 기록할 수 있습니다.
+- 여러 플로우를 나눠 관리할 수 있어 화면별 또는 기능별 구조 정리에 적합합니다.
+- 배포 환경에서도 미리 저장해둔 기본 플로우를 바로 보여줄 수 있습니다.
 
-  Run `npm run dev` to start the development server.
-  
->>>>>>> 4c5163f (initial commit)
+## 차별점
+
+- 노드만 그리는 툴이 아니라, 구현 메모와 구조 데이터를 같이 다루는 편집기입니다.
+- `frontend`, `backend`, `ai`, `database`, `external api` 같은 카테고리로 흐름을 명확히 구분할 수 있습니다.
+- 우측 패널에서 속성, 노트, JSON을 함께 관리할 수 있어 설계와 문서화를 한 번에 처리할 수 있습니다.
+- 로컬에서 만든 플로우를 배포 시 초기 화면에 그대로 반영할 수 있습니다.
+
+## 주요 기능
+
+- 노드 추가 및 방향별 연결
+- 다중 플로우 생성, 이름 변경, 삭제
+- 노드/엣지 속성 편집
+- Markdown 노트 작성
+- JSON 메타데이터 관리
+- 브라우저 저장
+- 전체 플로우 이미지 내보내기
+
+## 사용 방법
+
+1. 좌측 패널에서 플로우를 만들거나 선택합니다.
+2. 상단 `노드 추가` 버튼으로 흐름을 구성합니다.
+3. 노드나 연결선을 선택한 뒤 우측 패널에서 제목, 카테고리, 설명, JSON을 수정합니다.
+4. `저장` 버튼 또는 `Ctrl+S`로 현재 브라우저에 저장합니다.
+5. `내보내기` 버튼으로 플로우를 이미지로 추출할 수 있습니다.
+
+## 실행 방법
+
+```bash
+npm install
+npm run dev
+```
+
+브라우저에서 개발 서버 주소를 열면 바로 편집할 수 있습니다.
+
+## 배포 동작
+
+- 로컬에서 관리하던 `data/flows.db`를 기반으로 배포용 초기 플로우 JSON이 생성됩니다.
+- Vercel에 배포하면 첫 접속 시 이 초기 플로우가 표시됩니다.
+- 이후 사용자가 수정한 내용은 각 브라우저의 로컬 저장소에 저장됩니다.
+
+## 참고
+
+원본 디자인 리소스: https://www.figma.com/design/ROtBCTIVtkTIRmyjIr9sO9/tech-flow
